@@ -1,0 +1,248 @@
+﻿<!DOCTYPE HTML>
+<html>
+    <head>
+        <script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+        <script type="text/javascript" src="sisyphus.js"></script>
+        <script type="text/javascript" src="modernizr.js"></script>
+        <script type="text/javascript" charset="utf8" src="table2excel.js"></script>
+        <style type="text/css">
+            /* begin: text-fields styles */
+            input, input[type="password"], input[type="search"], isindex, textarea { -moz-box-sizing:  border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
+            /* end: text-fields styles */
+
+            /* begin: toolbar styles */
+            .toolbar{ margin-bottom:5px; height:20px;}
+            .toolbar .tlb-btn{ text-shadow: 0 -1px 0 rgba(0, 0, 0, .25); cursor: pointer; text-align:center; }
+
+            .toolbarBluebtn { background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #3d94f6), color-stop(1, #1e62d0) );
+                background:-moz-linear-gradient( center top, #3d94f6 5%, #1e62d0 100% ); background-color:#1e62d0; -moz-border-radius:4px;
+                -webkit-border-radius:4px; border-radius:4px; border:1px solid #075bd1; color:#ffffff; font-family:Arial, sans-serif;
+                font-size:.8em; font-weight:bold; text-decoration:none; height:100%;}
+            .toolbarBluebtn:hover { background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #1e62d0), color-stop(1, #3d94f6) );
+                background:-moz-linear-gradient( center top, #1e62d0 5%, #3d94f6 100% ); background-color:#3d94f6; }
+            .toolbarBluebtn:active { position:relative; top:1px; }
+
+            /* HTML Fields */
+            .show {display: inline-block;}
+            .clearBoth {clear: both;}
+            .container { width:1010px; }
+            .formHeader{ width:100%; padding-left:5px; }
+            .table {table-layout: fixed;border-collapse: collapse; width: 1000px;}
+            .sectionData { padding: 3px 5px 3px 0;}
+            .formTitle { font-family:Arial, sans-serif; font-size:28px; color:#5F0AAF; text-align: center; }
+            .textfield { border:1px solid #A5C0dF; font-family: Arial, Arial, sans-serif; padding: 2px; font-size:11px; color:#146;
+                margin-bottom:1px; width: 100%; }
+            .allbdrCenTop{border:.75pt solid windowtext;color:#000;font-family:Arial,sans-serif;font-size:10pt;font-style:normal;
+                font-weight:400;text-align:center;vertical-align:top;margin:0;word-wrap:break-word;}
+            .allbdrCenMidBld{border:.75pt solid windowtext;color:#000;font-family:Arial,sans-serif;font-size:10pt;font-style:normal;
+                font-weight:700;text-align:center;vertical-align:middle;margin:0;}
+            .allbdrLtMid{border:.75pt solid windowtext;color:#000;font-family:Arial,sans-serif;font-size:10pt;font-style:normal;
+                font-weight:400;text-align:left;vertical-align:middle;margin:0;}
+            .nobdrLtMid{color:#000;font-family:Arial,sans-serif;font-size:10pt;font-style:normal;font-weight:400;text-align:left;vertical-align:middle;margin:0;}
+            .nobdrRtMid{color:#000;font-family:Arial,sans-serif;font-size:10pt;font-style:normal;font-weight:400;text-align:right;
+                vertical-align:middle;margin:0;}
+            @media print{
+                .no-print,.ui-tabs-nav,.ui-accordion-header,.jw-header{display:none;}
+                .ui-widget-content{border:0;}.ui-accordion-content,.jw-content{height:auto!important;}.yes-print{display:block!important;}
+                .ui-state-active{border:1px solid #3385EA!important;}
+            }
+        </style>
+
+<!-- Begin loading Javascript functions -->
+    <script type="text/javascript">
+    $(window).load(function() {
+        window.scrollTo(0, 0);
+
+// Mordernizr.check for LocalStorage support by users' browser
+    $(function(){
+        if (Modernizr.localstorage) {
+    // Puts all data into local-memory if LocalStorage is available
+       $('#picsform').sisyphus({
+            autoRelease: false
+        });
+        } else {
+        alert ("LocalStorage is not supported by this browser." +
+        "\nIf you wish to have your data saved on this computer for later use" +
+        "\nplease consider using Chrome or Firefox.");
+        }
+    });
+
+// onclick listener for "Reset" and "Print All" buttons
+    $('.tlb-btn.toolbarBluebtn.reset').click(function(){{resetClick();}});
+
+// creates event listener for radio buttons to turn on and off comments fields
+    $('input:radio').live('change', function(){
+        var sstrSect = ($(this).attr('name').substr([3]));
+    var comFldId = ("C" + sstrSect);
+        if ($(this).val() == "NOK"){
+            document.getElementById(comFldId).style.display = '';
+        } else {
+            document.getElementById(comFldId).style.display = 'none';
+        }
+    });
+
+// checks radio-buttons already selected on re-opened or refreshed page and sets comments fields accordingly
+    $('input[type="radio"]:checked').each(function() {
+        var sstrSect = ($(this).attr('name').substr([3]));
+        var comFldId = ("C" + sstrSect);
+            if ($(this).val() == "NOK"){
+                document.getElementById(comFldId).style.display = '';
+            } else {
+                document.getElementById(comFldId).style.display = 'none';
+            }
+        });
+    });
+
+// reset button functionality - resets all scores, totals and clears LocalStorage
+    function resetClick(){
+        document.picsform.reset();
+        $('#picsform').sisyphus().manuallyReleaseData();
+    }
+
+// Creates Excel file from tables and downloads file
+    function toExcel(){
+//testing for Internet Explorer
+        var isMSIE = /*@cc_on!@*/0;
+        if (isMSIE) {
+            alert ("This is Internet Explorer");
+        } else {
+// else use this function for Chrome, FireFox, etc.
+        $("#General").table2excel({
+            name: "Excel Document Name"
+        });
+        }
+    }
+
+    </script>
+
+    <title>PIC/S Checklist</title>
+    </head>
+
+<body class="container">
+    <form id="picsform" name="picsform">
+        <div class="formHeader">
+            <table>
+                <tr>
+                <td style="width: 170px; height:40px;" class="nobdrLtMid">reserved for company logo</td>
+                <td class="formTitle" style="width: 650px;">PIC/S Checklist</td>
+                </tr>
+                <tr>
+                <td class="nobdrRtMid" style="padding-left: 170px;"><label for="Company">Company:</label></td>
+                <td class="nobdrLtMid" style="width: 200px;">
+                <input class="nobdrLtMid" type="text" id="Company" name="Company" title="Company" style="width: 100%"></td>
+                </tr>
+            </table>
+        <div class="clearBoth"></div>
+            <table style="padding-bottom: 10px;">
+                <tr>
+                <td class="nobdrRtMid" style="width: 100px;">
+                <label for="form.number">Form Number:</label></td>
+                <td class="nobdrLtMid" style="width: 125px;">
+                <input name="form.number" type="text"  class="textfield"
+                id="form.number" title="Form Number"
+                style="width:100%;"/></td>
+                <td class="nobdrRtMid" style="width: 100px;">
+                <label for="form.created">Date Created:</label></td>
+                <td class="nobdrLtMid" style="width: 125px;">
+                <input name="form.created" type="text" class="textfield"
+                id="form.created" title="Date Created" style="width:100%;"/></td>
+                <td class="nobdrRtMid" style="width: 100px;">
+                <label for="form.creatorname">Created By:</label></td>
+                <td class="nobdrLtTop" style="width: 150px;">
+                <input name="form.creatorname" type="text" id="form.creatorname"
+                class="textfield" title="Creator Name" style="width:100%;"></td>
+                <td class="nobdrRtMid" style="width: 100px;">
+                <label for="route.stepname">Current Step:</label></td>
+                <td class="nobdrLtMid" style="width: 150px;">
+                <input name="route.stepname" type="text" class="textfield"
+                id="route.stepname" title="Current Route Step"
+                style="width:100%;"/></td>
+                </tr>
+            </table>
+        <div class="clearboth"></div>
+        <a id="dlink"  style="display:none;"></a>
+            <div class="toolbar no-print" style="padding-left: 390px;">
+                <button class="tlb-btn toolbarBluebtn reset" style="margin-left:3px">Reset</button>
+                <input type="button" class="tlb-btn toolbarGreenbtn submit" style="margin-left:12px" id="submit"
+                name="submit" title="submit" value="Submit Form"/>
+                <input id="ExporttoExcel" class="show" type="button" onclick="toExcel('tablename', 'name')" value="Export to Excel">
+            </div>
+        </div>
+        <div class="sectionData">
+            <table class="table" id="General" border="2">
+                <tbody>
+                    <tr>
+                    <th class="allbdrCenMidBld" style="width: 155px;">Topic</th>
+                    <th class="allbdrCenMidBld" style="width: 730px;">Question:</th>
+                    <th class="allbdrCenMidBld" style="width: 30px;">OK</th>
+                    <th class="allbdrCenMidBld" style="width: 35px;">NOK</th>
+                    <th class="allbdrCenMidBld" style="width: 30px;">N/A</th>
+                    </tr>
+                    <tr>
+                    <td class="allbdrCenTop">Introduction</td>
+                    <td class="allbdrLtMid">Please provide the following information:
+                    <br>&nbsp;<input type="checkbox" id="Gen01O1" name="Gen01O1">
+                    &nbsp;<label for="Gen01O1">- Company introduction</label>
+                    <br>&nbsp;<input type="checkbox" id="Gen01O2" name="Gen01O2">
+                    &nbsp;<label for="Gen01O2">- Product list</label>
+                    <br>&nbsp;<input type="checkbox" id="Gen01O3" name="Gen01O3">
+                    &nbsp;<label for="Gen01O3">- Latest audit results from authority</label>
+                    <br>&nbsp;<input type="checkbox" id="Gen01O4" name="Gen01O4">
+                    &nbsp;<label for="Gen01O4">- Next schedule for audit</label></td>
+                    <td class="allbdrCenTop"><input type="radio" id="rb_GEN_01a" name="rb_GEN_01" value="OK"/></td>
+                    <td class="allbdrCenTop"><input type="radio" id="rb_GEN_01b" name="rb_GEN_01" value="NOK"/></td>
+                    <td class="allbdrCenTop"><input type="radio" id="rb_GEN_01c" name="rb_GEN_01" value="NA"/></td>
+                    </tr>
+                    <tr id="CGEN_01" style="display: none">
+                    <td colspan="5">
+                    <input id="ComGEN_01" type="text" value="" class="nobdrLtTopBl" placeholder="Comment on deficiency:"
+                    style="width:100%;" name="ComGEN_01" title="Com GEN 01"/>
+                    </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="sectionData">
+            <table class="table" id="Warehouse" border="2">
+                <tbody>
+                    <tr>
+                    <th class="allbdrCenMidBld" style="width: 155px;">Topic</th>
+                    <th class="allbdrCenMidBld" style="width: 730px;">Question:</th>
+                    <th class="allbdrCenMidBld" style="width: 30px;">OK</th>
+                    <th class="allbdrCenMidBld" style="width: 35px;">NOK</th>
+                    <th class="allbdrCenMidBld" style="width: 30px;">N/A</th>
+                    </tr>
+                    <tr>
+                    <td class="allbdrCenTop">RM receiving</td>
+                    <td class="allbdrLtMid">Visual inspection receipt bay condition.</td>
+                    <td class="allbdrCenTop"><input type="radio" id="rb_WHS_01a" name="rb_WHS_01" value="OK"/></td>
+                    <td class="allbdrCenTop"><input type="radio" id="rb_WHS_01b" name="rb_WHS_01" value="NOK"/></td>
+                    <td class="allbdrCenTop"><input type="radio" id="rb_WHS_01c" name="rb_WHS_01" value="NA"/></td>
+                    </tr>
+                    <tr id="CWHS_01" style="display: none">
+                    <td colspan="5">
+                    <input id="ComWHS_01" type="text" value="" class="nobdrLtTopBl" placeholder="Comment on deficiency:"
+                    style="width:100%;" name="ComWHS_01" title="Com WHS 01"/>
+                    </td>
+                    </tr>
+                    <tr>
+                    <td class="allbdrCenTop"></td>
+                    <td class="allbdrLtMid">Do you have SOP to check received materials conditions including
+                    container management (e.g. damaged container, check against delivery note, quality,
+                    identity, conformity)?</td>
+                    <td class="allbdrCenTop"><input type="radio" id="rb_WHS_02a" name="rb_WHS_02" value="OK"/></td>
+                    <td class="allbdrCenTop"><input type="radio" id="rb_WHS_02b" name="rb_WHS_02" value="NOK"/></td>
+                    <td class="allbdrCenTop"><input type="radio" id="rb_WHS_02c" name="rb_WHS_02" value="NA"/></td>
+                    </tr>
+                    <tr id="CWHS_02" style="display: none">
+                    <td colspan="5">
+                    <input id="ComWHS_02" type="text" value="" class="nobdrLtTopBl" placeholder="Comment on deficiency:"
+                    style="width:100%;" name="ComWHS_02" title="Com WHS 02"/>
+                    </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </form>
+</body>
+</html>
